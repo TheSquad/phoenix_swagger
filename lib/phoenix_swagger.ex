@@ -40,7 +40,7 @@ defmodule PhoenixSwagger do
 
     parameters = get_parameters(metadata)
     fun_name = ("swagger_" <> to_string(action)) |> String.to_atom
-    [response_code, response_description | meta] = Keyword.get(metadata, :responses)
+    [response_code, response_description | response_schema] = Keyword.get(metadata, :responses)
 
     quote do
       def unquote(fun_name)() do
@@ -49,7 +49,7 @@ defmodule PhoenixSwagger do
          unquote(tags),
          unquote(response_code),
          unquote(response_description),
-         unquote(meta)}
+         unquote(response_schema)}
       end
     end
   end
