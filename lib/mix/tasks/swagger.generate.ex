@@ -73,20 +73,21 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
       get_api_routes(router_mod)
       |> Enum.map(fn route -> {route, get_api(app_mod, route)} end)
 
-    for {api_route, {controller, swagger_fun}} <- api_routes,
-        function_exported?(controller, swagger_fun, 0),
-        into: %{} do
+    paths =
+      for {api_route, {controller, swagger_fun}} <- api_routes,
+          function_exported?(controller, swagger_fun, 0),
+          into: %{} do
 
-      {[description], tags, parameters, responses} = apply(controller, swagger_fun, [])
+        {[description], tags, parameters, responses} = apply(controller, swagger_fun, [])
 
-      {format_path(api_route.path),
-        %{api_route.verb => %{
-          description: description,
-          tags: tags,
-          parameters: get_parameters(parameters),
-          responses: get_responses(responses)}}}
-    end
-    |> Map.merge(swagger_map)
+        {format_path(api_route.path),
+          %{api_route.verb => %{
+            description: description,
+            tags: tags,
+            parameters: get_parameters(parameters),
+            responses: get_responses(responses)}}}
+      end
+    %{paths: paths} |> Map.merge(swagger_map)
   end
 
   defp merge_host(swagger_map, app_name, app_mod) do
