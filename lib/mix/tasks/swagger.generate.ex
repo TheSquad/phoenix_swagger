@@ -80,6 +80,7 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
       {[description], parameters, tags, response_code, response_description, response_schema} =
         apply(controller, swagger_fun, [])
 
+      response_code = response_code |> to_string
       # response_schema is loaded as a list, so we can Enum.into it into a map
       response_map =
         Enum.into(response_schema, %{description: response_description}, fn schema -> {:schema, schema} end)
