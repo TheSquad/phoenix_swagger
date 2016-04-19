@@ -59,13 +59,14 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   defp merge_info(swagger_map) do
     default_info = %{title: @default_title, version: @default_version}
 
-    if function_exported?(Mix.Project.get, :swagger_info, 0) do
-      default_info
-      |> Map.merge(Enum.into(Mix.Project.get.swagger_info, %{}))
-    else
-      default_info
-    end
-    |> Map.merge(swagger_map)
+    info =
+      if function_exported?(Mix.Project.get, :swagger_info, 0) do
+        default_info
+        |> Map.merge(Enum.into(Mix.Project.get.swagger_info, %{}))
+      else
+        default_info
+      end
+    %{info: info} |> Map.merge(swagger_map)
   end
 
   defp merge_paths(swagger_map, router_mod, app_mod) do
