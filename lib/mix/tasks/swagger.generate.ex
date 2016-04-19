@@ -77,20 +77,14 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
         function_exported?(controller, swagger_fun, 0),
         into: %{} do
 
-      {[description], parameters, tags, response_code, response_description, response_schema} =
-        apply(controller, swagger_fun, [])
-
-      response_code = response_code |> to_string
-      # response_schema is loaded as a list, so we can Enum.into it into a map
-      response_map =
-        Enum.into(response_schema, %{description: response_description}, fn schema -> {:schema, schema} end)
+      {[description], tags, parameters, responses} = apply(controller, swagger_fun, [])
 
       {format_path(api_route.path),
         %{api_route.verb => %{
           description: description,
           tags: tags,
           parameters: get_parameters(parameters),
-          responses: %{response_code => response_map}}}}
+          responses: get_responses(responses)}}}
     end
     |> Map.merge(swagger_map)
   end
@@ -137,10 +131,15 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   end
 
   defp get_parameters(parameters) do
-    Enum.map(parameters,
-      fn({:param, params_list}) ->
-        Enum.into(params_list, %{})
-      end) |> :lists.flatten
+    for {:param, params_list} <- parameters, do: Enum.into(params_list, %{})
+  end
+
+  defp get_responses(responses) do
+    for {:resp, [code: code, description: desc, schema: schema]} <- responses, into: %{} do
+      response_map = %{description: desc}
+      response_map = if not (schema |> Map.empty?), do: response_map |> Map.put(:schema, schema)
+      {code |> to_string, response_map}
+    end
   end
 
   defp get_api(_app_mod, route_map) do

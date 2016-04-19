@@ -32,6 +32,7 @@ defmodule PhoenixSwagger do
   end
 
   defmacro swagger_model(action, expr) do
+    fun_name = ("swagger_" <> to_string(action)) |> String.to_atom
     metadata = unblock(expr)
     description = Keyword.get(metadata, :description)
 
@@ -39,17 +40,14 @@ defmodule PhoenixSwagger do
     tags = Keyword.get(metadata, :tags, tags)
 
     parameters = get_parameters(metadata)
-    fun_name = ("swagger_" <> to_string(action)) |> String.to_atom
-    [response_code, response_description | response_schema] = Keyword.get(metadata, :responses)
+    responses = get_responses(metadata)
 
     quote do
       def unquote(fun_name)() do
         {PhoenixSwagger.get_description(__MODULE__, unquote(description)),
-         unquote(parameters),
          unquote(tags),
-         unquote(response_code),
-         unquote(response_description),
-         unquote(response_schema)}
+         unquote(parameters),
+         unquote(responses)}
       end
     end
   end
@@ -76,6 +74,21 @@ defmodule PhoenixSwagger do
             {:param, [in: path, name: name, type: valid_type?(type), required: false, description: description]}
           {:parameter, [path, name, type]} ->
             {:param, [in: path, name: name, type: valid_type?(type), required: false, description: ""]}
+          _ ->
+            []
+        end
+      end) |> :lists.flatten
+  end
+
+  @doc false
+  defp get_responses(responses) do
+    Enum.map(responses,
+      fn(metadata) ->
+        case metadata do
+          {:response, [response_code, response_description]} ->
+            {:resp, [code: response_code, description: response_description, schema: %{}]}
+          {:response, [response_code, response_description, response_schema]} ->
+            {:resp, [code: response_code, description: response_description, schema: response_schema]}
           _ ->
             []
         end
