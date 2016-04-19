@@ -3,11 +3,11 @@ defmodule PhoenixSwagger do
   @shortdoc "Generate swagger_[action] function for a phoenix controller"
 
   @moduledoc """
-  The PhoenixSwagger module provides swagger_model/2 macro that akes two
+  The PhoenixSwagger module provides swagger_model/2 macro that takes two
   arguments:
 
-    * `action` - name of the controller action (:index, ...);
-    * `expr`   - do block that contains swagger definitions.
+    * `action` - name of the controller action (:index, ...)
+    * `expr`   - do block that contains swagger definitions
 
   Example:
 
