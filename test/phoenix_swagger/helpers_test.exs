@@ -1,6 +1,6 @@
-defmodule PhoenixSwagger.HelperTest do
+defmodule PhoenixSwagger.HelpersTest do
   use ExUnit.Case
-  import PhoenixSwagger.Helper
+  import PhoenixSwagger.Helpers
   doctest PhoenixSwagger
 
   test "string creation" do

@@ -1,4 +1,4 @@
-defmodule PhoenixSwagger.Helper do
+defmodule PhoenixSwagger.Helpers do
 
   @shortdoc "Helper functions for generating standard swagger schema datatypes."
 
