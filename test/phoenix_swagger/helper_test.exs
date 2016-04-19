@@ -32,4 +32,9 @@ defmodule PhoenixSwagger.HelperTest do
             tomato: schema(:string)},
           required: [:apple, :banana, :peach])
   end
+
+  test "array creation" do
+    assert %{type: :array, items: %{type: :string}} =
+      schema(:array, items: schema(:string))
+  end
 end

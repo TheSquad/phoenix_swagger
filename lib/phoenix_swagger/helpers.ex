@@ -22,7 +22,11 @@ defmodule PhoenixSwagger.Helper do
     gen_object(properties, required) |> title(title)
   end
 
+  def schema(:array, opts), do: (opts[:items] || []) |> gen_array
+
   def schema(type, opts), do: raise "Unsupported type and/or options: #{inspect type} & #{inspect opts}"
+
+  # External helpers
 
   def title(%{} = schema, title), do: schema |> Map.put(:title, title)
 
@@ -31,7 +35,7 @@ defmodule PhoenixSwagger.Helper do
   def enum(%{type: type} = schema, [_ | _] = values) when type in [:string],
   do: schema |> Map.put(:enum, values)
 
-  # Helpers
+  # Internal helpers
 
   defp gen_simple(type), do: %{type: type}
 
@@ -39,5 +43,9 @@ defmodule PhoenixSwagger.Helper do
     %{type: :object,
       properties: properties,
       required: required |> Enum.filter(fn req -> properties |> Map.has_key?(req) end)}
+  end
+
+  defp gen_array(%{} = items_schema) do
+    %{type: :array, items: items_schema}
   end
 end
