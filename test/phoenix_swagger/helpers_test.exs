@@ -16,6 +16,12 @@ defmodule PhoenixSwagger.HelpersTest do
 
   test "object creation" do
     assert %{type: :object, title: "unnamed", properties: %{}, required: []} = schema(:object)
+
+    assert %{type: :object, title: "unnamed", properties: %{test: %{type: :string}}, required: [:test]} =
+      schema(:object, properties: %{test: schema(:string)})
+  end
+
+  test "complex object creation" do
     assert %{
       type: :object,
       title: "Fruits",
@@ -30,7 +36,7 @@ defmodule PhoenixSwagger.HelpersTest do
             apple: schema(:string),
             banana: schema(:string),
             tomato: schema(:string)},
-          required: [:apple, :banana, :peach])
+          required: [:apple, :banana, :peach]) # additional ones are filtered
   end
 
   test "array creation" do

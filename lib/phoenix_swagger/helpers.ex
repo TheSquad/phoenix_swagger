@@ -18,7 +18,7 @@ defmodule PhoenixSwagger.Helpers do
   def schema(:object, opts) do
     title      = opts[:title] || "unnamed"
     properties = opts[:properties] || %{}
-    required   = opts[:required] || []
+    required   = opts[:required] || :all
     gen_object(properties, required) |> title(title)
   end
 
@@ -39,6 +39,8 @@ defmodule PhoenixSwagger.Helpers do
 
   defp gen_simple(type), do: %{type: type}
 
+  defp gen_object(properties, :all), do: gen_object(properties, properties |> Map.keys)
+  defp gen_object(properties, :none), do: gen_object(properties, [])
   defp gen_object(properties, required) do
     %{type: :object,
       properties: properties,
