@@ -61,7 +61,7 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
 
     if function_exported?(Mix.Project.get, :swagger_info, 0) do
       default_info
-      |> Map.merge(Enum.into(Mix.Project.swagger_info, %{}))
+      |> Map.merge(Enum.into(Mix.Project.get.swagger_info, %{}))
     else
       default_info
     end
