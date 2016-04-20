@@ -39,9 +39,14 @@ defmodule PhoenixSwagger.Helpers do
 
   defp gen_simple(type), do: %{type: type}
 
-  defp gen_object(properties, :all), do: gen_object(properties, properties |> Map.keys)
-  defp gen_object(properties, :none), do: gen_object(properties, [])
-  defp gen_object(properties, required) do
+  defp gen_object(%{} = properties, required) do
+    if (properties |> Enum.empty?), do: %{type: :object},
+                                  else: gen_object_internal(properties, required)
+  end
+
+  defp gen_object_internal(properties, :all),    do: gen_object_internal(properties, properties |> Map.keys)
+  defp gen_object_internal(properties, :none),   do: gen_object_internal(properties, [])
+  defp gen_object_internal(properties, required) do
     %{type: :object,
       properties: properties,
       required: required |> Enum.filter(fn req -> properties |> Map.has_key?(req) end)}

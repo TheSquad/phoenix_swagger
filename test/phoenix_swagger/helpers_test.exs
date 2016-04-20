@@ -15,7 +15,7 @@ defmodule PhoenixSwagger.HelpersTest do
   end
 
   test "object creation" do
-    assert %{type: :object, title: "unnamed", properties: %{}, required: []} = schema(:object)
+    assert %{type: :object, title: "unnamed"} = schema(:object)
 
     assert %{type: :object, title: "unnamed", properties: %{test: %{type: :string}}, required: [:test]} =
       schema(:object, properties: %{test: schema(:string)})

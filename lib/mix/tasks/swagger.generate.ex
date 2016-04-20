@@ -139,7 +139,9 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   defp get_responses(responses) do
     for {:resp, [code: code, description: desc, schema: schema]} <- responses, into: %{} do
       response_map = %{description: desc}
-      response_map = if not (schema |> Enum.empty?), do: response_map |> Map.put(:schema, schema)
+      response_map =
+        if not (schema |> Enum.empty?), do: response_map |> Map.put(:schema, schema),
+                                      else: response_map
       {code |> to_string, response_map}
     end
   end
