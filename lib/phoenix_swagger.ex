@@ -86,7 +86,7 @@ defmodule PhoenixSwagger do
       fn(metadata) ->
         case metadata do
           {:response, [response_code, response_description]} ->
-            {:resp, [code: response_code, description: response_description, schema: %{}]}
+            {:resp, [code: response_code, description: response_description, schema: quote(do: %{})]}
           {:response, [response_code, response_description, response_schema]} ->
             {:resp, [code: response_code, description: response_description, schema: response_schema]}
           _ ->
