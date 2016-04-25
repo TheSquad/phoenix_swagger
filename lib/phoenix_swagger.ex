@@ -23,7 +23,7 @@ defmodule PhoenixSwagger do
 
   @swagger_data_types [:integer, :long, :float, :double, :string,
                        :byte, :binary, :boolean, :date, :dateTime,
-                       :password]
+                       :password, :file]
 
   defmacro __using__(_) do
     quote do
