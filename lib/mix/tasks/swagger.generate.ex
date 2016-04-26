@@ -93,8 +93,14 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
 
   defp merge_host(swagger_map, app_name, app_mod) do
     endpoint_config = Application.get_env(app_name,Module.concat([app_mod, :Endpoint]))
+
+    # TODO replace this with less magic. this is a hassle...
     %{host: host} = (endpoint_config[:url]  || [{:host, "localhost"}]) |> Enum.into(%{})
     %{port: port} = (endpoint_config[:http] || [{:port, @default_port}]) |> Enum.into(%{})
+    port = case port do
+      val when is_binary(val) or is_number(val) -> val
+      _                                         -> @default_port
+    end
 
     host_map = %{host: "#{host}:#{port}"}
 
