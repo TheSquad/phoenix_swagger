@@ -69,28 +69,6 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     %{info: info} |> Map.merge(swagger_map)
   end
 
-  defp merge_paths(swagger_map, router_mod, app_mod) do
-    api_routes =
-      get_api_routes(router_mod)
-      |> Enum.map(fn route -> {route, get_api(app_mod, route)} end)
-
-    paths =
-      for {api_route, {controller, swagger_fun}} <- api_routes,
-          function_exported?(controller, swagger_fun, 0),
-          into: %{} do
-
-        {[description], tags, parameters, responses} = apply(controller, swagger_fun, [])
-
-        {format_path(api_route.path),
-          %{api_route.verb => %{
-            description: description,
-            tags: tags,
-            parameters: get_parameters(parameters),
-            responses: get_responses(responses)}}}
-      end
-    %{paths: paths} |> Map.merge(swagger_map)
-  end
-
   defp merge_host(swagger_map, app_name, app_mod) do
     endpoint_config = Application.get_env(app_name,Module.concat([app_mod, :Endpoint]))
 
@@ -109,6 +87,40 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
       _   -> host_map |> Map.put(:schemes, ["https", "http"])
     end
     |> Map.merge(swagger_map)
+  end
+
+  defp merge_paths(swagger_map, router_mod, app_mod) do
+    api_routes =
+      get_api_routes(router_mod)
+      |> Enum.map(fn route -> {route, get_api(app_mod, route)} end)
+
+    paths =
+      Enum.reduce(api_routes, %{}, fn ({api_route, {controller, swagger_fun}}, acc) ->
+        if not function_exported?(controller, swagger_fun, 0) do
+          acc
+        else
+          {[description], tags, parameters, responses} = apply(controller, swagger_fun, [])
+          new_path = format_path(api_route.path)
+          new_method =
+            %{api_route.verb => %{
+              description: description,
+              tags: tags,
+              parameters: get_parameters(parameters),
+              responses: get_responses(responses)}}
+
+          case acc |> Map.get(new_path) do
+            nil              -> acc |> Map.put(new_path, new_method)
+            existing_methods ->
+              acc |> Map.put(new_path, existing_methods |> Map.merge(new_method))
+          end
+        end
+      end)
+
+    case swagger_map |> Map.get(:paths) do
+      nil            -> swagger_map |> Map.put(:paths, paths)
+      existing_paths ->
+        swagger_map |> Map.put(:paths, existing_paths |> Map.merge(paths))
+    end
   end
 
 

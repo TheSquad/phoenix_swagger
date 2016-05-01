@@ -34,7 +34,7 @@ defmodule PhoenixSwagger do
     metadata = unblock(expr)
     description = Keyword.get(metadata, :description)
 
-    IO.puts "Processing #{inspect (__CALLER__.module)} #{inspect action}"
+    IO.puts "Swagger - Processing #{inspect (__CALLER__.module)} #{inspect action}"
 
     tags = get_tags_module(__CALLER__)
     tags = Keyword.get(metadata, :tags, tags)
@@ -75,7 +75,7 @@ defmodule PhoenixSwagger do
           {:parameter, [path, name, type]} ->
             {:param, [in: path, name: name, type: valid_type?(type), required: false, description: ""]}
           {:parameter, other} ->
-            IO.puts "Could not match parameter declaration: #{inspect other}"
+            IO.puts "Swagger - Could not match parameter declaration: #{inspect other}"
             []
           _ -> []
         end
@@ -92,7 +92,7 @@ defmodule PhoenixSwagger do
           {:response, [response_code, response_description, response_schema]} ->
             {:resp, [code: response_code, description: response_description, schema: response_schema]}
           {:response, other} ->
-            IO.puts "Could not match response declaration: #{inspect other}"
+            IO.puts "Swagger - Could not match response declaration: #{inspect other}"
             []
           _ -> []
         end
