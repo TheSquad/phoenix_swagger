@@ -1,7 +1,5 @@
 defmodule PhoenixSwagger do
-
   @shortdoc "Generate swagger_[action] function for a phoenix controller"
-
   @moduledoc """
   The PhoenixSwagger module provides swagger_model/2 macro that takes two
   arguments:
@@ -20,6 +18,7 @@ defmodule PhoenixSwagger do
   Where the `schema` is a map that contains swagger response schema
   or a function that returns map.
   """
+  require Logger
 
   @swagger_data_types [:integer, :long, :float, :double, :string,
                        :byte, :binary, :boolean, :date, :dateTime,
@@ -74,7 +73,8 @@ defmodule PhoenixSwagger do
             {:param, [in: path, name: name, type: valid_type?(type), required: false, description: description]}
           {:parameter, [path, name, type]} ->
             {:param, [in: path, name: name, type: valid_type?(type), required: false, description: ""]}
-          _ ->
+          other ->
+            Logger.debug "[Swagger] could not match parameter declaration: #{inspect other}"
             []
         end
       end) |> :lists.flatten
@@ -89,7 +89,8 @@ defmodule PhoenixSwagger do
             {:resp, [code: response_code, description: response_description, schema: quote(do: %{})]}
           {:response, [response_code, response_description, response_schema]} ->
             {:resp, [code: response_code, description: response_description, schema: response_schema]}
-          _ ->
+          other ->
+            Logger.debug "[Swagger] could not match response declaration: #{inspect other}"
             []
         end
       end) |> :lists.flatten
