@@ -18,7 +18,6 @@ defmodule PhoenixSwagger do
   Where the `schema` is a map that contains swagger response schema
   or a function that returns map.
   """
-  require Logger
 
   @swagger_data_types [:integer, :long, :float, :double, :string,
                        :byte, :binary, :boolean, :date, :dateTime,
@@ -34,6 +33,8 @@ defmodule PhoenixSwagger do
     fun_name = ("swagger_" <> to_string(action)) |> String.to_atom
     metadata = unblock(expr)
     description = Keyword.get(metadata, :description)
+
+    IO.puts "Processing #{inspect __CALLER__} #{inspect action}"
 
     tags = get_tags_module(__CALLER__)
     tags = Keyword.get(metadata, :tags, tags)
@@ -74,7 +75,7 @@ defmodule PhoenixSwagger do
           {:parameter, [path, name, type]} ->
             {:param, [in: path, name: name, type: valid_type?(type), required: false, description: ""]}
           other ->
-            Logger.debug "[Swagger] could not match parameter declaration: #{inspect other}"
+            IO.puts "Could not match parameter declaration: #{inspect other}"
             []
         end
       end) |> :lists.flatten
@@ -90,7 +91,7 @@ defmodule PhoenixSwagger do
           {:response, [response_code, response_description, response_schema]} ->
             {:resp, [code: response_code, description: response_description, schema: response_schema]}
           other ->
-            Logger.debug "[Swagger] could not match response declaration: #{inspect other}"
+            IO.puts "Could not match response declaration: #{inspect other}"
             []
         end
       end) |> :lists.flatten
