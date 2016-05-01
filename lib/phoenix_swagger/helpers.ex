@@ -60,8 +60,9 @@ end
 defmodule PhoenixSwagger.Helpers.ShortCodes do
   import PhoenixSwagger.Helpers
 
-  def int, do: schema(:integer)
-  def str, do: schema(:string)
+  def int,  do: schema(:integer)
+  def str,  do: schema(:string)
+  def bool, do: schema(:boolean)
 
   def obj(title, %{} = properties), do: schema(:object, title: title, properties: properties)
   def obj(_title, _props), do: raise "Invalid obj schema call. Params are title and property map."
