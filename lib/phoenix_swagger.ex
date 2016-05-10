@@ -61,19 +61,18 @@ defmodule PhoenixSwagger do
     |> Enum.filter(&(String.length(&1) > 0))
   end
 
-  @doc false
   defp get_parameters(parameters) do
     Enum.map(parameters,
       fn(metadata) ->
         case metadata do
           {:parameter, [path, name, type, :required, description]} ->
-            {:param, [in: path, name: name, type: valid_type?(type), required: true, description: description]}
+            {:param, [in: pascalize(path), name: name, type: valid_type?(type), required: true, description: description]}
           {:parameter, [path, name, type, :required]} ->
-            {:param, [in: path, name: name, type: valid_type?(type), required: true, description: ""]}
+            {:param, [in: pascalize(path), name: name, type: valid_type?(type), required: true, description: ""]}
           {:parameter, [path, name, type, description]} ->
-            {:param, [in: path, name: name, type: valid_type?(type), required: false, description: description]}
+            {:param, [in: pascalize(path), name: name, type: valid_type?(type), required: false, description: description]}
           {:parameter, [path, name, type]} ->
-            {:param, [in: path, name: name, type: valid_type?(type), required: false, description: ""]}
+            {:param, [in: pascalize(path), name: name, type: valid_type?(type), required: false, description: ""]}
           {:parameter, other} ->
             IO.puts "Swagger - Could not match parameter declaration: #{inspect other}"
             []
@@ -82,7 +81,6 @@ defmodule PhoenixSwagger do
       end) |> :lists.flatten
   end
 
-  @doc false
   defp get_responses(responses) do
     Enum.map(responses,
       fn(metadata) ->
@@ -99,7 +97,11 @@ defmodule PhoenixSwagger do
       end) |> :lists.flatten
   end
 
-  @doc false
+  defp pascalize(string) when is_binary(string),
+  do: Inflex.camelize(string, :lower)
+
+  defp pascalize(other), do: other |> to_string |> pascalize
+
   defp valid_type?(type) do
     if not (type in @swagger_data_types) do
       raise "Error: write datatype: #{type}"
@@ -108,18 +110,7 @@ defmodule PhoenixSwagger do
     end
   end
 
-  @doc false
   defp unblock([do: {:__block__, _, body}]) do
     Enum.map(body, fn({name, _line, params}) -> {name, params} end)
   end
-
-  @doc false
-  def get_description(_, description) when is_list(description) do
-    description
-  end
-
-  def get_description(module, description) when is_function(description) do
-    module.description()
-  end
-
 end
