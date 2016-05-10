@@ -47,7 +47,7 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
       |> merge_info()
       |> merge_host(app_name, app_mod)
       |> merge_paths(Module.concat(app_mod, Router), app_mod)
-      |> Poison.encode!
+      |> Poison.encode!(pretty: true)
 
     File.write(output_file, swagger_json)
     Code.delete_path(ebin)
