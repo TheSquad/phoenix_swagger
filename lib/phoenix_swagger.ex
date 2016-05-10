@@ -52,6 +52,16 @@ defmodule PhoenixSwagger do
     end
   end
 
+  def get_description(_, description) when is_list(description) do
+    description
+  end
+
+  def get_description(module, description) when is_function(description) do
+    module.description()
+  end
+
+  # Helpers
+
   defp get_tags_module(caller) do
     caller.module
     |> Module.split
