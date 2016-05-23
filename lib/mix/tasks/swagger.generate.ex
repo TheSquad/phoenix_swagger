@@ -151,7 +151,7 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   defp get_api_routes(router_mod, app_pipelines) do
     Enum.filter(router_mod.__routes__,
       fn(route_path) ->
-        route_path.pipe_through in app_pipelines
+        route_path.pipe_through |> Enum.all?(fn x -> x in app_pipelines end)
       end)
   end
 
