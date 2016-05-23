@@ -35,8 +35,14 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   end
 
   def run(output_file) do
+    config =
+      if function_exported?(Mix.Project.get, :swagger_config, 0),
+      do: Mix.Project.get.swagger_info,
+      else: []
+
     app_name = Mix.Project.get.project[:app]
-    app_mod = Mix.Project.get.application[:mod] |> elem(0)
+    app_mod = Mix.Project.get.application[:mod]
+    app_pipelines = config[:router_pipelines] || [:api]
 
     # append path with the given application
     ebin = @app_path <> "_build/" <> (Mix.env |> to_string) <> "/lib/" <> (app_name |> to_string) <> "/ebin"
@@ -45,8 +51,8 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     swagger_json =
       %{swagger: "2.0"}
       |> merge_info()
-      |> merge_host(app_name, app_mod)
-      |> merge_paths(Module.concat(app_mod, Router), app_mod)
+      |> merge_host(app_name, app_mod, config)
+      |> merge_paths(Module.concat(app_mod, Router), app_mod, app_pipelines)
       |> Poison.encode!(pretty: true)
 
     File.write(output_file, swagger_json)
@@ -69,12 +75,11 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     %{info: info} |> Map.merge(swagger_map)
   end
 
-  defp merge_host(swagger_map, app_name, app_mod) do
+  defp merge_host(swagger_map, app_name, app_mod, config) do
     endpoint_config = Application.get_env(app_name,Module.concat([app_mod, :Endpoint]))
 
-    # TODO replace this with less magic. this is a hassle...
-    %{host: host} = (endpoint_config[:url]  || [{:host, "localhost"}]) |> Enum.into(%{})
-    %{port: port} = (endpoint_config[:http] || [{:port, @default_port}]) |> Enum.into(%{})
+    host = config[:host] || endpoint_config[:url][:host] || "localhost"
+    port = config[:port] || endpoint_config[:url][:port] || endpoint_config[:http][:port] || 4000
     port = case port do
       val when is_binary(val) or is_number(val) -> val
       _                                         -> @default_port
@@ -89,9 +94,9 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     |> Map.merge(swagger_map)
   end
 
-  defp merge_paths(swagger_map, router_mod, app_mod) do
+  defp merge_paths(swagger_map, router_mod, app_mod, app_pipelines) do
     api_routes =
-      get_api_routes(router_mod)
+      get_api_routes(router_mod, app_pipelines)
       |> Enum.map(fn route -> {route, get_api(app_mod, route)} end)
 
     paths =
@@ -143,10 +148,10 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     end
   end
 
-  defp get_api_routes(router_mod) do
+  defp get_api_routes(router_mod, app_pipelines) do
     Enum.filter(router_mod.__routes__,
       fn(route_path) ->
-        route_path.pipe_through == [:api]
+        route_path.pipe_through in app_pipelines
       end)
   end
 
