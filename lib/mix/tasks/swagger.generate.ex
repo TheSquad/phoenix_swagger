@@ -37,11 +37,11 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   def run(output_file) do
     config =
       if function_exported?(Mix.Project.get, :swagger_config, 0),
-      do: Mix.Project.get.swagger_info,
+      do: Mix.Project.get.swagger_config,
       else: []
 
     app_name = Mix.Project.get.project[:app]
-    app_mod = Mix.Project.get.application[:mod]
+    app_mod = Mix.Project.get.application[:mod] |> elem(0)
     app_pipelines = config[:router_pipelines] || [:api]
 
     # append path with the given application
@@ -76,7 +76,7 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   end
 
   defp merge_host(swagger_map, app_name, app_mod, config) do
-    endpoint_config = Application.get_env(app_name,Module.concat([app_mod, :Endpoint]))
+    endpoint_config = Application.get_env(app_name, Module.concat([app_mod, :Endpoint]))
 
     host = config[:host] || endpoint_config[:url][:host] || "localhost"
     port = config[:port] || endpoint_config[:url][:port] || endpoint_config[:http][:port] || 4000
