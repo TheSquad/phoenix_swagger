@@ -27,6 +27,7 @@ defmodule PhoenixSwagger.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:inflex, "~> 1.5"}]
+    [{:inflex, "~> 1.5"},
+     {:json, "~> 0.3.0"}]
   end
 end

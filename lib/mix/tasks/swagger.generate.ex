@@ -34,30 +34,42 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     """
   end
 
+require Logger
+
   def run(output_file) do
     config =
       if function_exported?(Mix.Project.get, :swagger_config, 0),
       do: Mix.Project.get.swagger_config,
       else: []
 
-    app_name = Mix.Project.get.project[:app]
-    app_mod = Mix.Project.get.application[:mod] |> elem(0)
-    app_pipelines = config[:router_pipelines] || [:api]
+      app_name = Mix.Project.get.project[:app]
+      app_mod = Mix.Project.get.application[:mod] |> elem(0)
+      app_pipelines = config[:router_pipelines] || [:api]
 
-    # append path with the given application
-    ebin = @app_path <> "_build/" <> (Mix.env |> to_string) <> "/lib/" <> (app_name |> to_string) <> "/ebin"
-    Code.append_path(ebin)
+      ebin = @app_path <> "_build/" <> (Mix.env |> to_string) <> "/lib/" <> (app_name |> to_string) <> "/ebin"
+      Code.append_path(ebin)
 
-    swagger_json =
-      %{swagger: "2.0"}
+      IO.puts "Sorting APIs..."
+
+      sorted_paths = %{}
+      |> merge_paths(Module.concat(app_mod, Router), app_mod, app_pipelines)
+      |> get_in([:paths])
+      |> Enum.to_list
+      |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
+      |> Enum.sort
+
+      swagger_json = %{swagger: "2.0"}
       |> merge_info()
       |> merge_host(app_name, app_mod, config)
-      |> merge_paths(Module.concat(app_mod, Router), app_mod, app_pipelines)
-      |> Poison.encode!(pretty: true)
+      |> Map.put_new(:paths, sorted_paths)
 
-    File.write(output_file, swagger_json)
-    Code.delete_path(ebin)
-    IO.puts "Done."
+      swagger_json = swagger_json
+      |> JSON.encode
+      |> elem(1)
+
+      File.write(output_file, swagger_json)
+      Code.delete_path(ebin)
+      IO.puts "Done."
   end
 
   # Helpers
@@ -66,12 +78,12 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     default_info = %{title: @default_title, version: @default_version}
 
     info =
-      if function_exported?(Mix.Project.get, :swagger_info, 0) do
-        default_info
-        |> Map.merge(Enum.into(Mix.Project.get.swagger_info, %{}))
-      else
-        default_info
-      end
+    if function_exported?(Mix.Project.get, :swagger_info, 0) do
+      default_info
+      |> Map.merge(Enum.into(Mix.Project.get.swagger_info, %{}))
+    else
+      default_info
+    end
     %{info: info} |> Map.merge(swagger_map)
   end
 
@@ -81,9 +93,9 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     host = config[:host] || endpoint_config[:url][:host] || "localhost"
     port = config[:port] || endpoint_config[:url][:port] || endpoint_config[:http][:port] || 4000
     port = case port do
-      val when is_binary(val) or is_number(val) -> val
-      _                                         -> @default_port
-    end
+             val when is_binary(val) or is_number(val) -> val
+             _                                         -> @default_port
+           end
 
     host_map = %{host: "#{host}:#{port}"}
 
@@ -108,10 +120,10 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
           new_path = format_path(api_route.path)
           new_method =
             %{api_route.verb => %{
-              description: description,
-              tags: tags,
-              parameters: get_parameters(parameters),
-              responses: get_responses(responses)}}
+             description: description,
+             tags: tags,
+             parameters: get_parameters(parameters),
+             responses: get_responses(responses)}}
 
           case acc |> Map.get(new_path) do
             nil              -> acc |> Map.put(new_path, new_method)
@@ -148,11 +160,15 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     end
   end
 
+  require Logger
+
   defp get_api_routes(router_mod, app_pipelines) do
-    Enum.filter(router_mod.__routes__,
+    pp = Enum.filter(router_mod.__routes__,
       fn(route_path) ->
         route_path.pipe_through |> Enum.all?(fn x -> x in app_pipelines end)
       end)
+      |> Enum.sort_by(&(&1.helper))
+    pp
   end
 
   defp get_parameters(parameters) do
@@ -163,8 +179,8 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
     for {:resp, [code: code, description: desc, schema: schema]} <- responses, into: %{} do
       response_map = %{description: desc}
       response_map =
-        if not (schema |> Enum.empty?), do: response_map |> Map.put(:schema, schema),
-                                      else: response_map
+      if not (schema |> Enum.empty?), do: response_map |> Map.put(:schema, schema),
+      else: response_map
       {code |> to_string, response_map}
     end
   end
