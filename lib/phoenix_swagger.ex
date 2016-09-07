@@ -39,8 +39,31 @@ defmodule PhoenixSwagger do
     tags = get_tags_module(__CALLER__)
     tags = Keyword.get(metadata, :tags, tags)
 
+    security_enabled = Mix.Project.get.swagger_info |> Enum.into(%{}) |> Map.get(:plug_security)
+    security_headers =
+    [{:param, [description: "Service's SID",
+               in: "header",
+               name: :sid,
+               required: false,
+               type: :string]},
+     {:param, [description: "Service's Auth Token",
+               in: "header",
+               name: :auth,
+               required: false,
+               type: :string]}]
+
+
     parameters = get_parameters(metadata)
     responses = get_responses(metadata)
+
+    parameters = if security_enabled do
+      IO.puts "Adding security headers to: #{inspect action}"
+      security_headers ++ parameters
+    else
+      parameters
+    end
+
+    IO.inspect parameters
 
     quote do
       def unquote(fun_name)() do
