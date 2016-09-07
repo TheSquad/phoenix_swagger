@@ -63,8 +63,6 @@ defmodule PhoenixSwagger do
       parameters
     end
 
-    IO.inspect parameters
-
     quote do
       def unquote(fun_name)() do
         {PhoenixSwagger.get_description(__MODULE__, unquote(description)),
