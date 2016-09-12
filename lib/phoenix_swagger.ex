@@ -52,15 +52,24 @@ defmodule PhoenixSwagger do
                required: false,
                type: :string]}]
 
+    security_responses = [resp: [code: 401, description: "Unauthenticated", schema: {:%{}, [], []}], resp: [code: 403, description: "Unauthorised", schema: {:%{}, [], []}]]
 
     parameters = get_parameters(metadata)
     responses = get_responses(metadata)
+
 
     parameters = if security_enabled do
       IO.puts "Adding security headers to: #{inspect action}"
       security_headers ++ parameters
     else
       parameters
+    end
+
+    responses = if security_enabled do
+      IO.puts "Adding security responses to: #{inspect action}"
+      responses ++ security_responses
+    else
+      responses
     end
 
     quote do
