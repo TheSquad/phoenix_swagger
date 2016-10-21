@@ -1,3 +1,19 @@
+defmodule Mix.Tasks.Swagger do
+  use Mix.Task
+
+  @app_path Enum.at(Mix.Project.load_paths, 0) |> String.split("_build") |> Enum.at(0)
+  @swagger_file_name "swagger.json"
+  @swagger_file_path @app_path <> "priv/static/doc/" <> @swagger_file_name
+  @doc_path @app_path <> "priv/static/doc"
+
+  def run([]) do
+    if !File.exists?(@doc_path) do
+      res = File.cp_r! @app_path <> "deps/phoenix_swagger/priv/static/doc", @doc_path
+    end
+    Mix.Tasks.Phoenix.Swagger.Generate.run(@swagger_file_path)
+  end
+end
+
 defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   use Mix.Task
 
