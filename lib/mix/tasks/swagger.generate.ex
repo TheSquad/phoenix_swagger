@@ -60,7 +60,7 @@ require Logger
 
       swagger_json = %{swagger: "2.0"}
       |> merge_info()
-      |> merge_host(app_name, app_mod, config)
+      # |> merge_host(app_name, app_mod, config)
       |> Map.put_new(:paths, sorted_paths)
 
       swagger_json = swagger_json
