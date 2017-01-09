@@ -41,12 +41,12 @@ defmodule PhoenixSwagger do
 
     security_enabled = Mix.Project.get.swagger_info |> Enum.into(%{}) |> Map.get(:plug_security)
     security_headers =
-    [{:param, [description: "Service's SID",
+    [{:param, [description: "Service SID",
                in: "header",
                name: :sid,
                required: false,
                type: :string]},
-     {:param, [description: "Service's Auth Token",
+     {:param, [description: "Service Auth Token",
                in: "header",
                name: :auth,
                required: false,
