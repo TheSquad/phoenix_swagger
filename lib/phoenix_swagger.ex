@@ -52,7 +52,7 @@ defmodule PhoenixSwagger do
                required: false,
                type: :string]}]
 
-    security_responses = [resp: [code: 401, description: "Unauthenticated", schema: {:%{}, [], []}], resp: [code: 403, description: "Unauthorised", schema: {:%{}, [], []}]]
+    security_responses = [resp: [code: 401, description: "Unauthorized", schema: {:%{}, [], []}], resp: [code: 403, description: "Forbidden", schema: {:%{}, [], []}]]
 
     parameters = get_parameters(metadata)
     responses = get_responses(metadata)

@@ -58,6 +58,8 @@ require Logger
       do: Mix.Project.get.swagger_config,
       else: []
 
+      IO.puts "Config: #{inspect config}"
+
       app_name = Mix.Project.get.project[:app]
       app_mod = Mix.Project.get.application[:mod] |> elem(0)
       app_pipelines = config[:router_pipelines] || [:api]
@@ -65,7 +67,7 @@ require Logger
       ebin = @app_path <> "_build/" <> (Mix.env |> to_string) <> "/lib/" <> (app_name |> to_string) <> "/ebin"
       Code.append_path(ebin)
 
-      IO.puts "Sorting APIs..."
+      IO.puts "Sorting APIs...: #{inspect app_mod} / #{inspect app_pipelines}"
 
       sorted_paths = %{}
       |> merge_paths(Module.concat(app_mod, Router), app_mod, app_pipelines)
