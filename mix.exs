@@ -4,7 +4,7 @@ defmodule PhoenixSwagger.Mixfile do
   def project do
     [app: :phoenix_swagger,
       version: "0.0.1",
-      elixir: "~> 1.2",
+      elixir: "~> 1.4",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: deps()]
@@ -27,7 +27,7 @@ defmodule PhoenixSwagger.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:inflex, "~> 1.5"},
-     {:json, "~> 0.3.0"}]
+    [{:inflex, "~> 1.9"},
+     {:json, "~> 1.0"}]
   end
 end
