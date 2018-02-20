@@ -8,7 +8,7 @@ defmodule Mix.Tasks.Swagger do
 
   def run([]) do
     if !File.exists?(@doc_path) do
-      res = File.cp_r! @app_path <> "deps/phoenix_swagger/priv/static/doc", @doc_path
+      File.cp_r! @app_path <> "deps/phoenix_swagger/priv/static/doc", @doc_path
     end
     Mix.Tasks.Phoenix.Swagger.Generate.run(@swagger_file_path)
   end
@@ -29,7 +29,7 @@ defmodule Mix.Tasks.Phoenix.Swagger.Generate do
       mix phoenix.swagger.generate ../swagger.json
   """
 
-  @default_port 4000
+  #@default_port 4000
   @default_title "<enter your title>"
   @default_version "0.0.1"
 
@@ -105,24 +105,24 @@ require Logger
     %{info: info} |> Map.merge(swagger_map)
   end
 
-  defp merge_host(swagger_map, app_name, app_mod, config) do
-    endpoint_config = Application.get_env(app_name, Module.concat([app_mod, :Endpoint]))
+  # defp merge_host(swagger_map, app_name, app_mod, config) do
+  #   endpoint_config = Application.get_env(app_name, Module.concat([app_mod, :Endpoint]))
 
-    host = config[:host] || endpoint_config[:url][:host] || "localhost"
-    port = config[:port] || endpoint_config[:url][:port] || endpoint_config[:http][:port] || 4000
-    port = case port do
-             val when is_binary(val) or is_number(val) -> val
-             _                                         -> @default_port
-           end
+  #   host = config[:host] || endpoint_config[:url][:host] || "localhost"
+  #   port = config[:port] || endpoint_config[:url][:port] || endpoint_config[:http][:port] || 4000
+  #   port = case port do
+  #            val when is_binary(val) or is_number(val) -> val
+  #            _                                         -> @default_port
+  #          end
 
-    host_map = %{host: "#{host}:#{port}"}
+  #   host_map = %{host: "#{host}:#{port}"}
 
-    case endpoint_config[:https] do
-      nil -> host_map
-      _   -> host_map |> Map.put(:schemes, ["https", "http"])
-    end
-    |> Map.merge(swagger_map)
-  end
+  #   case endpoint_config[:https] do
+  #     nil -> host_map
+  #     _   -> host_map |> Map.put(:schemes, ["https", "http"])
+  #   end
+  #   |> Map.merge(swagger_map)
+  # end
 
   defp merge_paths(swagger_map, router_mod, app_mod, app_pipelines) do
     api_routes =

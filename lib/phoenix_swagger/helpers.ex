@@ -1,7 +1,5 @@
 defmodule PhoenixSwagger.Helpers do
 
-  @shortdoc "Helper functions for generating standard swagger schema datatypes."
-
   @moduledoc """
   The PhoenixSwagger.Helper module provides simple helper functions that
   can be used to simplify generation of Swagger schema definitions.
