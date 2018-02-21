@@ -1,5 +1,4 @@
 defmodule PhoenixSwagger do
-  @shortdoc "Generate swagger_[action] function for a phoenix controller"
   @moduledoc """
   The PhoenixSwagger module provides swagger_model/2 macro that takes two
   arguments:
