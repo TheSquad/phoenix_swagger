@@ -31,7 +31,7 @@ returns keyword list that contains `Info Object` fields:
 
 ```elixir
 def swagger_info do
-  [version: "0.0.0", title: "My awesome phoenx application"]
+  [version: "0.0.0", title: "My awesome phoenix application"]
 end
 ```
 
@@ -135,5 +135,10 @@ To generate `swagger` file with the custom name/place, pass it to the main mix t
 mix phoenix.swagger.generate ~/my-phoenix-api.json
 ```
 
-For more informantion, you can find `swagger` specification [here](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md).
+For more information, you can find `swagger` specification [here](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md).
 
+## Phoenix >= 1.3.x
+Starting from version 1.3 Phoenix application and router module was named differently (previously <application_name> and <application_module>.Router was used, now <application_name>.Application and <application_module>Web.Router are used). Therefore analysis of the routers path was not compatible anymore.
+This version correct the analysis behaviour when Phoenix >= 1.3.0 is used.
+The phoenix version is retrieved by using checking project dependencies.
+If another naming convention is used, a new configuration parameter, router_mod, can be added into swagger_config, to specify explicitly the router module name.

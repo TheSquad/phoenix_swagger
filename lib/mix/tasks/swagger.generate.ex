@@ -14,6 +14,14 @@ defmodule Mix.Tasks.Swagger do
   end
 end
 
+defmodule Mix.Tasks.Check do
+  use Mix.Task
+
+  def run(_) do
+
+  end
+end
+
 defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   use Mix.Task
 
@@ -68,13 +76,46 @@ require Logger
       Code.append_path(ebin)
 
       IO.puts "Sorting APIs...: #{inspect app_mod} / #{inspect app_pipelines}"
+      router_mod = case config[:router_mod] do
+        nil ->
+          new_phoenix = try do
+            requirement = Mix.Project.get.project()[:deps] |> List.keyfind(:phoenix, 0) |> elem(1)
+            Version.match?("1.3.0", requirement)
+          catch
+            _, error ->
+              IO.puts("unable to check phoenix version [#{inspect error}]")
+              false
+          rescue
+            error ->
+              IO.puts("unable to check phoenix version [#{inspect error}]")
+              false
+          else
+            result ->
+              result
+          end
+          if new_phoenix do
+            router = ((app_mod |> to_string()
+              |> String.split(".")
+              |> List.delete("Application")
+              |> Enum.join(".")) <> "Web")
+            |> Module.concat(Router)
+            IO.puts "using router #{router} (phoenix >= 1.3.0)"
+            router
+          else
+            IO.puts "using router #{app_mod}.Router (phoenix < 1.3.0)"
+            app_mod |> Module.concat(Router)
+          end
+        parameter ->
+          IO.puts "using router #{parameter} (configuration defined)"
+          parameter
+      end
 
       sorted_paths = %{}
-      |> merge_paths(Module.concat(app_mod, Router), app_mod, app_pipelines)
+      |> merge_paths(router_mod, app_mod, app_pipelines)
       |> get_in([:paths])
-      |> Enum.to_list
+      |> Enum.to_list()
       |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
-      |> Enum.sort
+      |> Enum.sort()
 
       swagger_json = %{swagger: "2.0"}
       |> merge_info()
@@ -82,7 +123,7 @@ require Logger
       |> Map.put_new(:paths, sorted_paths)
 
       swagger_json = swagger_json
-      |> JSON.encode
+      |> JSON.encode()
       |> elem(1)
 
       File.write(output_file, swagger_json)
