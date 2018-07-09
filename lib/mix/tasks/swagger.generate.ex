@@ -14,14 +14,6 @@ defmodule Mix.Tasks.Swagger do
   end
 end
 
-defmodule Mix.Tasks.Check do
-  use Mix.Task
-
-  def run(_) do
-
-  end
-end
-
 defmodule Mix.Tasks.Phoenix.Swagger.Generate do
   use Mix.Task
 
