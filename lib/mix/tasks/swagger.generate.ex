@@ -71,8 +71,8 @@ require Logger
       router_mod = case config[:router_mod] do
         nil ->
           new_phoenix = try do
-            requirement = Mix.Project.get.project()[:deps] |> List.keyfind(:phoenix, 0) |> elem(1)
-            Version.match?("1.3.0", requirement)
+            version = Mix.Dep.cached() |> Enum.filter(&(&1.app == :phoenix)) |> hd() |> Map.get(:status) |> elem(1)
+            Version.match?(version, ">= 1.3.0")
           catch
             _, error ->
               IO.puts("unable to check phoenix version [#{inspect error}]")
