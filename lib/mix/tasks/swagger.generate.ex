@@ -72,6 +72,7 @@ require Logger
         nil ->
           new_phoenix = try do
             version = Mix.Dep.cached() |> Enum.filter(&(&1.app == :phoenix)) |> hd() |> Map.get(:status) |> elem(1)
+            IO.puts "phoenix version #{version}"
             Version.match?(version, ">= 1.3.0")
           catch
             _, error ->
@@ -94,7 +95,7 @@ require Logger
             IO.puts "using router #{router} (phoenix >= 1.3.0)"
             router
           else
-            IO.puts "using router #{app_mod}.Router (phoenix < 1.3.0)"
+            IO.puts "using router #{app_mod}.Router (phoenix  < 1.3.0)"
             app_mod |> Module.concat(Router)
           end
         parameter ->
